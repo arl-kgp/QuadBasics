@@ -17,33 +17,63 @@ function [F, M] = controller(t, state, des_state, params)
 
 
 % =================== Your code goes here ===================
-Kdy = 10;
-Kpy = 0.01;
 
-Kpz = 100.0;
-Kdz = 25;
-
-Kpr = 5000.0;
-Kdr = 100;
-
-%y_error = des_state.pos(1) - state.pos(1);
-%ydot_error = des_state.vel(1) - state.vel(1);
-z_error = des_state.pos(3) - state.pos(3);
-zdot_error = des_state.vel(3) - state.vel(3);
-
-%roll_angle = -(des_state.acc(1) + (Kdy*ydot_error) + (Kpy*y_error))/params.gravity;
-
-%roll_error = roll_angle - state.rot;
-%rolldot_error = -state.omega;
-%rollddot = 0;
-
-F = params.mass*(params.gravity + des_state.acc(3) + (Kdz*zdot_error) + (Kpz*z_error));
-%u2 = params.Ixx*(rollddot + (Kdr*rolldot_error) + (Kpr*roll_error));
 % Thrust
-%F = 0;
+F = 0;
 
 % Moment
 M = zeros(3,1);
+
+
+%Control parameters
+Kp_angle=[160
+          160
+          160];
+      
+Kd_angle=[1
+          1
+          1];
+
+Kp=[100
+    100
+    800];
+    
+Kd=[1
+    1
+    1];
+
+
+
+
+acc_c=Kd.*(des_state.vel-state.vel)+Kp.*(des_state.pos-state.pos)+des_state.acc;
+
+
+F=params.mass*(params.gravity+acc_c(3));
+
+if F<params.minF
+    F=params.minF;
+end
+if F>params.maxF
+    F=params.maxF;
+end
+
+phi_c=(1/params.gravity)*(acc_c(1)*sin(des_state.yaw)-acc_c(2)*cos(des_state.yaw));
+
+theta_c=(1/params.gravity)*(acc_c(1)*cos(des_state.yaw)+acc_c(2)*sin(des_state.yaw));
+
+
+rot_c=[phi_c
+       theta_c
+       des_state.yaw];
+
+
+omega_c=[0
+         0
+         des_state.yawdot];
+
+
+M=Kp_angle.*(rot_c-state.rot) + Kd_angle.*(omega_c-state.omega);
+
 
 % =================== Your code ends here ===================
 
