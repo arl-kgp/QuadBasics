@@ -26,30 +26,15 @@ M = zeros(3,1);
 
 
 %Control parameters
-Kp_angle=[160
-          160
-          160];
+Kp_angle=[160;160;160];
       
-Kd_angle=[1
-          1
-          1];
+Kd_angle=[1;1;1];
 
-Kp=[100
-    100
-    800];
+Kp=[100;100;800];
     
-Kd=[1
-    1
-    1];
-
-
-
-
+Kd=[1; 1; 1];
 acc_c=Kd.*(des_state.vel-state.vel)+Kp.*(des_state.pos-state.pos)+des_state.acc;
-
-
 F=params.mass*(params.gravity+acc_c(3));
-
 if F<params.minF
     F=params.minF;
 end
@@ -58,19 +43,10 @@ if F>params.maxF
 end
 
 phi_c=(1/params.gravity)*(acc_c(1)*sin(des_state.yaw)-acc_c(2)*cos(des_state.yaw));
-
 theta_c=(1/params.gravity)*(acc_c(1)*cos(des_state.yaw)+acc_c(2)*sin(des_state.yaw));
 
-
-rot_c=[phi_c
-       theta_c
-       des_state.yaw];
-
-
-omega_c=[0
-         0
-         des_state.yawdot];
-
+rot_c= [phi_c; theta_c ; des_state.yaw];
+omega_c=[0 ; 0 ; des_state.yawdot];
 
 M=Kp_angle.*(rot_c-state.rot) + Kd_angle.*(omega_c-state.omega);
 
